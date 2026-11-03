@@ -1,4 +1,4 @@
-# Configuración del canal. Cambia aquí el indicador y la región; el código no cambia.
+# Configuración del canal. Cambia aquí el indicador, la región y el proveedor de LLM; el código no cambia.
 indicador:
   codigo: SP.DYN.LE00.IN
   nombre: Esperanza de vida al nacer
@@ -16,3 +16,23 @@ datos:
 
 atribucion: "The World Bank: Life expectancy at birth, total (years): World Development Indicators"
 licencia: "CC BY 4.0"
+
+guion:
+  proveedor: gemini        # gemini | cloudflare
+  respaldo: cloudflare     # se usa si el principal falla por cuota o error; null para desactivar
+  intentos_maximos: 3      # regeneraciones si el validador rechaza el guion
+  estructura: pregunta_misterio_resolucion
+  pregunta: "¿Qué países de América Latina y el Caribe ganaron más años de vida desde 1960?"
+  palabras_objetivo: "entre 900 y 1300"   # ~7 a 9 minutos de locución
+  palabras_min: 600        # el validador rechaza guiones fuera de este rango
+  palabras_max: 1600
+  escenas_min: 7
+  escenas_max: 14
+  gemini:
+    # Los modelos se retiran con frecuencia. Verifica con: python src/script.py --listar-modelos
+    modelo: gemini-3.1-flash-lite
+    max_tokens: 16000
+  cloudflare:
+    modelo: "@cf/meta/llama-3.1-8b-instruct"
+    max_tokens: 6000
+    temperatura: 0.6
