@@ -30,7 +30,7 @@ guion:
   escenas_max: 14
   gemini:
     # Los modelos se retiran con frecuencia. Verifica con: python src/script.py --listar-modelos
-    modelo: gemini-3.1-flash-lite
+    modelo: gemini-3.8-flash-lite
     max_tokens: 16000
   cloudflare:
     modelo: "@cf/meta/llama-3.1-8b-instruct"
