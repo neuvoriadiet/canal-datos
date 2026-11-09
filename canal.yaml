@@ -1,0 +1,44 @@
+# Configuración del canal. Cambia aquí el indicador, la región y el proveedor de LLM; el código no cambia.
+indicador:
+  codigo: SP.DYN.LE00.IN
+  nombre: Esperanza de vida al nacer
+  nombre_fuente: "Life expectancy at birth, total (years)"
+  unidad: años
+  base_de_datos: World Development Indicators
+
+datos:
+  region: LCN            # LCN = América Latina y el Caribe (código del Banco Mundial). null = todos los países
+  anio_inicio: 1960
+  anio_fin_maximo: 2026  # se usa el último año con cobertura suficiente
+  cobertura_minima: 0.9  # fracción de países con dato para aceptar un año como "último año"
+  completitud_serie: 0.95  # un país entra solo si tiene al menos esta fracción de los años
+  cache_dias: 7
+
+atribucion: "The World Bank: Life expectancy at birth, total (years): World Development Indicators"
+licencia: "CC BY 4.0"
+
+guion:
+  proveedor: gemini        # gemini | cloudflare
+  respaldo: cloudflare     # se usa si el principal falla por cuota o error; null para desactivar
+  intentos_maximos: 3      # regeneraciones si el validador rechaza el guion
+  estructura: pregunta_misterio_resolucion
+  pregunta: "¿Qué países de América Latina y el Caribe ganaron más años de vida desde 1960?"
+  palabras_objetivo: "entre 900 y 1300"   # ~7 a 9 minutos de locución
+  palabras_min: 600        # el validador rechaza guiones fuera de este rango
+  palabras_max: 1600
+  escenas_min: 7
+  escenas_max: 14
+  rondas: 2                # vueltas completas por la lista de modelos si todos están saturados (503)
+  pausa_ronda_s: 45        # segundos de espera entre rondas
+  gemini:
+    # Se prueban en orden; si uno está saturado pasa al siguiente. Los modelos cambian seguido:
+    # verifica los nombres con el workflow "Listar modelos de Gemini disponibles".
+    modelos:
+      - gemini-3.8-flash
+      - gemini-3.5-flash-lite
+    max_tokens: 16000
+  cloudflare:
+    modelos:
+      - "@cf/meta/llama-3.1-8b-instruct"
+    max_tokens: 6000
+    temperatura: 0.6
