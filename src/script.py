@@ -297,6 +297,8 @@ def _post(url, headers, cuerpo, reintentos=4):
     for i in range(1, reintentos + 1):
         try:
             r = requests.post(url, headers=headers, json=cuerpo, timeout=180)
+        except requests.exceptions.InvalidHeader as e:
+            raise RuntimeError(f"Cabecera inválida (revisa que la clave no tenga espacios ni saltos de línea): {e}") from e
         except requests.RequestException as e:
             if i == reintentos:
                 raise RuntimeError(f"Error de red: {e}") from e
@@ -321,7 +323,7 @@ def _post(url, headers, cuerpo, reintentos=4):
 
 
 def llamar_gemini(sistema, usuario, c):
-    clave = os.environ.get("GEMINI_API_KEY")
+    clave = os.environ.get("GEMINI_API_KEY", "").strip()
     if not clave:
         raise RuntimeError("Falta el secreto GEMINI_API_KEY.")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{c['modelo']}:generateContent"
@@ -347,8 +349,8 @@ def llamar_gemini(sistema, usuario, c):
 
 
 def llamar_cloudflare(sistema, usuario, c):
-    cuenta = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
-    token = os.environ.get("CLOUDFLARE_API_TOKEN")
+    cuenta = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "").strip()
+    token = os.environ.get("CLOUDFLARE_API_TOKEN", "").strip()
     if not cuenta or not token:
         raise RuntimeError("Faltan los secretos CLOUDFLARE_ACCOUNT_ID y/o CLOUDFLARE_API_TOKEN.")
     url = f"https://api.cloudflare.com/client/v4/accounts/{cuenta}/ai/run/{c['modelo']}"
@@ -373,7 +375,7 @@ PROVEEDORES = {"gemini": llamar_gemini, "cloudflare": llamar_cloudflare}
 
 
 def listar_modelos_gemini():
-    clave = os.environ.get("GEMINI_API_KEY")
+    clave = os.environ.get("GEMINI_API_KEY", "").strip()
     if not clave:
         raise SystemExit("Define la variable de entorno GEMINI_API_KEY para listar los modelos.")
     r = requests.get("https://generativelanguage.googleapis.com/v1beta/models",
@@ -392,7 +394,7 @@ DEFAULTS = {
     "estructura": "pregunta_misterio_resolucion", "pregunta": "",
     "palabras_objetivo": "entre 900 y 1300", "palabras_min": 600, "palabras_max": 1600,
     "escenas_min": 7, "escenas_max": 14,
-    "gemini": {"modelo": "gemini-3.1-flash-lite", "max_tokens": 16000},
+    "gemini": {"modelo": "gemini-3.5-flash-lite", "max_tokens": 16000},
     "cloudflare": {"modelo": "@cf/meta/llama-3.1-8b-instruct", "max_tokens": 6000, "temperatura": 0.6},
 }
 
